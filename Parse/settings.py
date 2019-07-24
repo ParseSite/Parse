@@ -40,7 +40,7 @@ INSTALLED_APPS = [
 
     'crispy_forms',
     'tinymce',
-
+    # 'django.contrib.gis',
     'blog.apps.BlogConfig',
     'users.apps.UsersConfig',
 ]
@@ -68,10 +68,12 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'Parse.context_processors.add_variable_to_context',
             ],
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'Parse.wsgi.application'
 
