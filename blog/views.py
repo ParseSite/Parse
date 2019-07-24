@@ -9,7 +9,7 @@ from django.views.generic import (
     UpdateView,
     DeleteView
 )
-from .models import Post, PostView, SavePost, Comment, LikeComment
+from .models import Post, PostView, SavePost, Comment, LikeComment,sendNotif
 from .forms import CommentForm, PostForm
 
 
@@ -112,6 +112,32 @@ def un_save_post(request, pk):
     saved_post.delete()
     return redirect(reverse('post-detail', kwargs={'pk': pk}))
 
+def sendcomment(request , post, data):
+    postid = post.id
+    text = data['content']
+    sn = sendNotif(post= Post.objects.get(id=postid) , user=User.objects.get(id=request.user.id), dateposted= 0, Text=text)
+    sn.save()
+    return redirect(request.META.get('HTTP_REFERER'))
+
+def sendrate(request, post):
+    postid = post.id
+    text = "rate"
+    sn = sendNotif(post= Post.objects.get(id=postid) , user=User.objects.get(id=request.user.id), dateposted= 0, Text=text)
+    sn.save()
+    return redirect(request.META.get('HTTP_REFERER'))
+
+def my_notif(request):
+    notifs = sendNotif.objects.all()
+    for n in notifs:
+        if n.post.author == request.user:
+            if n.seen == False:
+                n.seen = True
+                n.save()
+
+    context = {
+        'notifications':sendNotif.objects.all()
+    }
+    return render(request, 'blog/notif.html', context)
 
 def post_is_saved(pk, user):
     queryset = SavePost \
@@ -197,6 +223,7 @@ class PostDetailView(DetailView):
             form.instance.user = request.user
             form.instance.post = post
             form.save()
+            sendcomment(request,post, form.data)
             return redirect(reverse("post-detail", kwargs={
                 'pk': post.pk
             }))

@@ -4,12 +4,18 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 
 
+
 class Location(models.Model):
     x = models.IntegerField()
     y = models.IntegerField()
 
     def __str__(self):
-        return str(self.x, self.y)
+        return str(self.x + self.y)
+
+
+# class loc(models2.Model):
+#     name = models.CharField(max_length=100)
+#     location = models.PointField()
 
 
 class Category(models.Model):
@@ -106,3 +112,10 @@ class SavePost(models.Model):
 
     def __str__(self):
         return str(self.post.content)
+
+class sendNotif(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    Text = models.TextField()
+    dateposted = models.DateTimeField(auto_now_add=True)
+    seen = models.BooleanField(default=False)

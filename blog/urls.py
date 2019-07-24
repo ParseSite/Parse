@@ -22,5 +22,6 @@ urlpatterns = [
     path('post/<int:pk>/save_post/', views.save_post, name='save_post'),
     path('post/<int:pk>/un_save_post/', views.un_save_post, name='un_save_post'),
     path('post/<int:pk>/like_comment/', views.like_comment, name='like_comment'),
+    path('users/sendcomment/', views.my_notif, name='send-comment'),
 
 ]

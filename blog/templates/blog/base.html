@@ -30,8 +30,14 @@
             <div class="navbar-nav">
               {% if request.user.is_authenticated %}
                 <a class="nav-item nav-link" href="{% url 'post-create' %}">New Post</a>
-                  <a class="nav-item nav-link" href="#"><i class="fa fa-bell" style="font-size:24px"></i></a>
-                <a class="nav-item nav-link" href="{% url 'user_page' request.user.username %}"><i style="font-size:24px" class="fas fa-user"></i></a>
+                  <a class="nav-item nav-link" href="{% url 'send-comment'%}"><i class="fa fa-bell" style="font-size:24px"></i>
+                        {% ifnotequal num 0 %}
+                            {{ num }}
+                        {% endifnotequal %}
+
+                </a>
+{#                  <a class="nav-item nav-link" href="#"><i class="fa fa-bell" style="font-size:24px"></i></a>#}
+                <a class="nav-item nav-link" href="{% url 'user_page' request.user.username %}"><i style="font-size:24px" class="fa fa-user-o"></i></a>
                 <a class="nav-item nav-link" href="{% url 'logout' %}"><i style="font-size:24px" class="fa">&#xf08b;</i></a>
               {% else %}
                 <a class="nav-item nav-link" href="{% url 'login' %}">Login</a>
