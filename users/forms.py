@@ -5,6 +5,7 @@ from .models import profile
 
 
 class UserRegisterForm(UserCreationForm):
+    username = forms.CharField(max_length=20, help_text='Required. 20 characters or fewer. Letters, digits and @/./+/-/_ only.')
     email = forms.EmailField()
 
     class Meta:

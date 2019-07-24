@@ -109,8 +109,6 @@ a.article-title:hover {
 .iconify { width: 28px; height: 28px; }
 
 .like_dislike {
-  /*position: relative;*/
-  /*left: 0;*/
-  margin-bottom: -13px;
-  /*top: -1px;*/
+  margin-bottom: -13.5px;
+  margin-top: -3px;
 }

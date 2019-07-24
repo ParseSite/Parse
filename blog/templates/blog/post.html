@@ -5,38 +5,43 @@
   <script>
     $(document).ready(function () {
 
-        $(".my_thump-up_icon").click(function () {
-           $(this).toggleClass("toggle-color");
-        });
+        function updateColor(comment_pk){
 
-        $(".my_thump-up_blue_icon").click(function () {
-           $(this).toggleClass("toggle-color");
-        });
+            $.ajax({
+                url: 'liked_or_disliked_comment',
+                data: {
+                  'comment_pk': comment_pk
+                },
+                dataType: 'json',
+                success: function(data){
+                    console.log(data);
+                    if (data.liked || data.disliked) {
+                       $(".cen-like.active."+data.id).css('border-bottom', '3px solid rgb(6, 95, 212)');
+                    } else {
+                        $(".cen-like.active."+data.id).css('border-bottom', '2px solid rgb(144, 144, 144)');
+                    }
+                    if (data.liked){
+                        $(".my_thumps_icon.up.active."+data.id).css('color', 'rgb(6, 95, 212)');
+                    } else {
+                        $(".my_thumps_icon.up.active."+data.id).css('color', 'rgb(144, 144, 144)');
+                    }
+                    if (data.disliked) {
+                        $(".my_thumps_icon.down.active."+data.id).css('color', 'rgb(6, 95, 212)');
+                    } else {
+                        $(".my_thumps_icon.down.active."+data.id).css('color', 'rgb(144, 144, 144)');
+                    }
 
-        $(".cen-like").click(function () {
-           $(this).toggleClass("toggle-color-blue");
-        });
-
-        $(".cen-like.blue-border").click(function () {
-           $(this).toggleClass("toggle-color");
-        });
-
-        $("#20").click(function () {
-            console.log("10000");
-            $(this).val(10)
-        });
-
-        function updateText(btn, Liked_disliked, num){
-            if (Liked_disliked === 1){
-                {#console.log('heyyyyy', btn.val(), $(".my_num_input").val(), num)#}
-            } else {
-            }
+                }, error: function(error){
+                  console.log(error);
+                  console.log("error")
+                }
+            });
         }
 
         $(".like-btn").click(function () {
             var this_ = $(this);
             var comment = this_.attr("data-comment");
-            console.log(comment);
+            console.log('like comment with id: ', comment);
 
             $.ajax({
                 url: 'like_comment',
@@ -46,7 +51,34 @@
                 dataType: 'json',
                 success: function(data){
                     console.log(data);
-                    $("#number_"+data.id).val(data.likes_count);
+                    $("#like-number_"+data.id).val(data.likes_count);
+                    $("#dislike-number_"+data.id).val(data.dislikes_count);
+                    updateColor(data.id)
+
+                }, error: function(error){
+                  console.log(error);
+                  console.log("error")
+                }
+            });
+
+        });
+
+        $(".dislike-btn").click(function () {
+            var this_ = $(this);
+            var comment = this_.attr("data-comment");
+            console.log('dislike comment with id: ', comment);
+
+            $.ajax({
+                url: 'dislike_comment',
+                data: {
+                  'comment_pk': comment
+                },
+                dataType: 'json',
+                success: function(data){
+                    console.log(data);
+                    $("#dislike-number_"+data.id).val(data.dislikes_count);
+                    $("#like-number_"+data.id).val(data.likes_count);
+                    updateColor(data.id)
 
                 }, error: function(error){
                   console.log(error);
@@ -140,37 +172,75 @@
                           <img src="{% static 'blog/static_in_env/img/user.svg' %}" alt="..." class="img-fluid rounded-circle">
                           {% endif %}
                         </a>
-                        <div class="title"><strong>{{ comment.user.username }}</strong><span class="date">{{ comment.timestamp|timesince }} ago</span></div>
+                        <div class="title my_div_outer">
+                            <strong>{{ comment.user.username }}
+                                {% if request.user.is_authenticated and request.user == comment.user %}
+                                <a href="{% url 'delete_comment' post.pk comment.pk%}" onclick="return confirm('Are you sure you want to delete this comment?')"><i style='color:rgba(220, 53, 69, 0.9);' class='fas'>&#xf2ed;</i></a>
+                                {% endif %}
+                            </strong>
+                            <span class="date">{{ comment.timestamp|timesince }} ago</span>
+                        </div>
+
                       </div>
+
                     </div>
                     <div class="comment-body">
                       <p>{{ comment.content }}</p>
                         <div class="like_dislike">
                             {% if request.user.is_authenticated %}
-                                <a class="like_dislike like-btn" data-comment='{{ comment.id }}' >
-                                    {% if do_like_comments.pop %}
-                                        <div class="cen-like blue-border">
-                                            <button class="my_thump-up_btn">
-                                                <i class="my_thump-up_blue_icon material-icons">&#xe8dc;</i>
-                                            </button>
-                                            <input id="number_{{ comment.id }}" class="my_num_input" type="button" value="{{ comment.like_comment_count }}">
+                                <a class="like_dislike">
+                                    {% if do_like_comments.pop or do_dislike_comments.pop %}
+                                        <div class="cen-like blue-border active {{ comment.id }}">
+                                            {% if do_like_comments2.pop %}
+                                                <button class="like-btn my_thumps_btn" data-comment='{{ comment.id }}'>
+                                                    <i class="my_thumps_icon up blue active {{ comment.id }} material-icons">&#xe8dc;</i>
+                                                </button>
+                                                <input id="like-number_{{ comment.id }}" class="my_num_input" type="button" value="{{ comment.like_comment_count }}">
+
+                                                <button class="dislike-btn my_thumps_btn" data-comment='{{ comment.id }}'>
+                                                    <i class="my_thumps_icon down black active {{ comment.id }} material-icons">&#xe8db;</i>
+                                                </button>
+                                                <input id="dislike-number_{{ comment.id }}" class="my_num_input" type="button" value="{{ comment.dislike_comment_count }}">
+                                            {% else %}
+                                                <button class="like-btn my_thumps_btn" data-comment='{{ comment.id }}'>
+                                                    <i class="my_thumps_icon up black active {{ comment.id }} material-icons">&#xe8dc;</i>
+                                                </button>
+                                                <input id="like-number_{{ comment.id }}" class="my_num_input" type="button" value="{{ comment.like_comment_count }}">
+
+                                                <button class="dislike-btn my_thumps_btn" data-comment='{{ comment.id }}'>
+                                                    <i class="my_thumps_icon down blue active {{ comment.id }} material-icons">&#xe8db;</i>
+                                                </button>
+                                                <input id="dislike-number_{{ comment.id }}" class="my_num_input" type="button" value="{{ comment.dislike_comment_count }}">
+                                            {% endif %}
                                         </div>
-                                    {% else %}
-                                        <div class="cen-like black-border">
-                                            <button class="my_thump-up_btn">
-                                                <i class="my_thump-up_icon material-icons">&#xe8dc;</i>
+                                    {% elif not do_like_comments2.pop%}
+                                        <div class="cen-like black-border active {{ comment.id }}">
+                                            <button class="like-btn my_thumps_btn" data-comment='{{ comment.id }}'>
+                                                <i class="my_thumps_icon up black active {{ comment.id }} material-icons">&#xe8dc;</i>
                                             </button>
-                                            <input id="number_{{ comment.id }}" class="my_num_input" type="button" value="{{ comment.like_comment_count }}">
+                                            <input id="like-number_{{ comment.id }}" class="my_num_input" type="button" value="{{ comment.like_comment_count }}">
+
+                                            <button class="dislike-btn my_thumps_btn" data-comment='{{ comment.id }}'>
+                                                <i class="my_thumps_icon down black active {{ comment.id }} material-icons">&#xe8db;</i>
+                                            </button>
+                                            <input id="dislike-number_{{ comment.id }}" class="my_num_input" type="button" value="{{ comment.dislike_comment_count }}">
                                         </div>
                                     {% endif %}
                                 </a>
                             {% else %}
-                                <div class="like_dislike cen-like-not-logged-in">
-                                    <button class="my_thump-up_btn">
-                                        <i class="my_thump-up_icon-not-logged-in material-icons">&#xe8dc;</i>
-                                    </button>
-                                    <input class="my_num_input" type="button" value="{{ comment.like_comment_count }}">
-                                </div>
+                                <a class="like_dislike">
+                                    <div class="cen-like">
+                                        <button class="my_thumps_btn">
+                                            <i class="my_thumps_icon black material-icons">&#xe8dc;</i>
+                                        </button>
+                                        <input class="my_num_input" type="button" value="{{ comment.like_comment_count }}">
+
+                                        <button class="my_thumps_btn">
+                                            <i class="my_thumps_icon black material-icons">&#xe8db;</i>
+                                        </button>
+                                        <input class="my_num_input" type="button" value="{{ comment.dislike_comment_count }}">
+                                    </div>
+                                </a>
                             {% endif %}
                         </div>
                     </div>
