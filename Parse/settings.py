@@ -40,7 +40,7 @@ INSTALLED_APPS = [
 
     'crispy_forms',
     'tinymce',
-
+    # 'django.contrib.gis',
     'blog.apps.BlogConfig',
     'users.apps.UsersConfig',
 ]
@@ -73,6 +73,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'Parse.wsgi.application'
 
