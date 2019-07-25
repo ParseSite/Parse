@@ -25,5 +25,6 @@ urlpatterns = [
     path('post/<int:pk>/dislike_comment/', views.dislike_comment, name='dislike_comment'),
     path('post/<int:pk>/liked_or_disliked_comment/', views.liked_or_disliked_comment, name='liked_or_disliked_comment'),
     path('post/<int:pk>/delete_comment/<int:comment_pk>', views.delete_comment, name='delete_comment'),
+    path('users/sendcomment/', views.my_notif, name='send-comment'),
 
 ]

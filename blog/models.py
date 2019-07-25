@@ -106,3 +106,10 @@ class SavePost(models.Model):
 
     def __str__(self):
         return str(self.post.content)
+
+class sendNotif(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    Text = models.TextField()
+    dateposted = models.DateTimeField(auto_now_add=True)
+    seen = models.BooleanField(default=False)

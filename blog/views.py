@@ -9,12 +9,39 @@ from django.views.generic import (
     UpdateView,
     DeleteView
 )
-from .models import Post, PostView, SavePost, Comment, LikeComment, DislikeComment
+from .models import Post, PostView, SavePost, Comment, LikeComment, DislikeComment,sendNotif
 from .forms import CommentForm, PostForm
 
 
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+
+def sendcomment(request , post, data):
+    postid = post.id
+    text = data['content']
+    sn = sendNotif(post= Post.objects.get(id=postid) , user=User.objects.get(id=request.user.id), dateposted= 0, Text=text)
+    sn.save()
+    return redirect(request.META.get('HTTP_REFERER'))
+
+def sendrate(request, post):
+    postid = post.id
+    text = "rate"
+    sn = sendNotif(post= Post.objects.get(id=postid) , user=User.objects.get(id=request.user.id), dateposted= 0, Text=text)
+    sn.save()
+    return redirect(request.META.get('HTTP_REFERER'))
+
+def my_notif(request):
+    notifs = sendNotif.objects.all()
+    for n in notifs:
+        if n.post.author == request.user:
+            if n.seen == False:
+                n.seen = True
+                n.save()
+
+    context = {
+        'notifications':sendNotif.objects.all()
+    }
+    return render(request, 'blog/notif.html', context)
 
 
 @api_view(['GET', 'POST', ])
@@ -260,10 +287,10 @@ class PostDetailView(DetailView):
             form.instance.user = request.user
             form.instance.post = post
             form.save()
+            sendcomment(request,post, form.data)
             return redirect(reverse("post-detail", kwargs={
                 'pk': post.pk
             }))
-
 
 class PostCreateView(CreateView):
     model = Post
